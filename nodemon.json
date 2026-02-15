@@ -1,0 +1,5 @@
+{
+  "events": {
+    "restart": "sh ./scripts/kill-port.sh 5000"
+  }
+}

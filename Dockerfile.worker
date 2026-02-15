@@ -1,0 +1,28 @@
+# ================================
+# Backend Worker Dockerfile
+# Runs cron jobs separately from API service
+# ================================
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S worker -u 1001
+
+# Copy production dependencies (reuse from main backend build)
+COPY package.json package-lock.json ./
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Copy application source
+COPY --chown=worker:nodejs src ./src
+
+# Switch to non-root user
+USER worker
+
+ENV NODE_ENV=production
+
+# Run cron worker (we'll create this file)
+CMD ["node", "src/workers/cron.js"]
